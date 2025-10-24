@@ -1,4 +1,4 @@
-// the wrapper
+/* --- the wrapper --- */
 
 function initVbooks(selector, options = {}) {
 	const els = document.querySelectorAll(selector);
@@ -15,7 +15,7 @@ function initVbooks(selector, options = {}) {
 }
 
 
-// the core
+/* --- the core --- */
 
 (function (global, factory) {
   if (typeof module === "object" && typeof module.exports === "object") {
@@ -54,9 +54,9 @@ function initVbooks(selector, options = {}) {
 			spine: 40,
             
 			coverThikness: 2,
-			coverColor: "#666",
+			coverColor: "#999",
 			spineThikness: 2,
-			spineColor: "#666",
+			spineColor: "#999",
 			pagesOffset: 2,
 			pages: 20,
 			pagesColor: "#fff",
@@ -65,9 +65,9 @@ function initVbooks(selector, options = {}) {
             book_img_cover: {},
 			book_img_back: {},
 			book_img_spine: {},
-			book_img_pages_top: 'book/head_r2.png',
-			book_img_pages_side: 'book/head_r2.png',
-			book_img_pages_bottom: 'book/head_r2.png',
+			book_img_pages_top: '',
+			book_img_pages_side: '',
+			book_img_pages_bottom: '',
 			book_img_pages: {},
             
             // book shadows
@@ -214,7 +214,7 @@ function initVbooks(selector, options = {}) {
 	}
 	
 
-	// =============== Overwrite lifecycle hooks ===============
+	/* =============== Overwrite lifecycle hooks =============== */
 	
 	_init() {
         this.emit("initBefore");
@@ -502,7 +502,7 @@ function initVbooks(selector, options = {}) {
         if(this.state !='open'){
             return;
         }
-        // limit num from 0 - 19
+        /* limit num from 0 - 19 */
         if (num < 0) {
             num = 0;
         }
@@ -515,12 +515,12 @@ function initVbooks(selector, options = {}) {
 
 		this.page_z++;
 
-		// lift up the current page
+		/* lift up the current page */
 		if (num > 0) {
 			let py = this.book.querySelectorAll('.vb-body .vb-pages .vb-page')[num-1];
 			py.style['z-index'] = this.page_z;
 		}
-		// add/remove flip classes   
+		/* add/remove flip classes */  
 		for (let i = 0; i < this.page_count-1; i++) {
 			let px = this.book.querySelectorAll('.vb-body .vb-pages .vb-page')[i];
 			if (i < num) {
@@ -529,13 +529,13 @@ function initVbooks(selector, options = {}) {
 				px.classList.remove('flip');
 			}
 		}
-		// repeat for closing all pages
+		/* repeat for closing all pages */
 		if (this.closing == true) {
 			setTimeout(() => {
 				this.bookClosePages();
 			}, 50);
 		}
-		// set pagination
+		/* set pagination */
         this.updateUI();
         this.emit("pageFlip", { page: num });
 		this.emit("pageFlipAfter", { page: num });
@@ -555,13 +555,13 @@ function initVbooks(selector, options = {}) {
             let start = currentIndex - half;
             let end = currentIndex + half;
 
-            // left limit
+            /* left limit */
             if (start < 0) {
                 end += Math.abs(start);
                 start = 0;
             }
 
-            // right limit
+            /* right limit */
             if (end > this.pages - 1) {
                 const diff = end - (this.pages - 1);
                 start -= diff;
@@ -570,15 +570,15 @@ function initVbooks(selector, options = {}) {
             }
 
             bullets.forEach((b, i) => {
-                // remove all
+                /* remove all */
                 b.classList.remove('on', 'hidden');
 
-                // set current active
+                /* set current active */
                 if (i === currentIndex) {
                     b.classList.add('on');
                 }
 
-                // Dynamic visibility
+                /* Dynamic visibility */
                 if (i < start || i > end) {
                     b.classList.add('hidden');
                 }
@@ -668,20 +668,17 @@ function initVbooks(selector, options = {}) {
 		const pages = this.options.pages;
 		let html = '';
 		for (let i = 0; i < pages - 1; i++) {
-			//if (i === 0 || i === this.options.book_img_pages.length - 1) return "";
-			//if (i % 2 === 1) {
+			
 			html += `
             <div class="vb-page">
               <div class="vb-back">${lazyImg(this.options.book_img_pages[i + 1], "", 50)}</div>
               <div class="vb-front">${lazyImg(this.options.book_img_pages[i], "", 50)}</div>
             </div>
           `;
-			//}
-			//return "";
+			
 		}
 		return `<div class="vb-pages prehide">${html}</div>`;
 
-		//  return '';
 	}
 
 	// =====================
@@ -730,7 +727,7 @@ function initVbooks(selector, options = {}) {
 	_bindEvents() {
         this._handlers = this._handlers || {};
         
-        // Pagination Clicks
+        /* Pagination Clicks */
         if(this.options.uiPagination){
             this._handlers.paginationClick = (e, index) => {
                 if (this.state == 'closed') this.bookOpen();
@@ -742,7 +739,7 @@ function initVbooks(selector, options = {}) {
                 this._handlers[`pagination_${index}`] = { el, handler, type: 'click' };
             });
         }
-        // Buttons
+        /* Buttons */
         if(this.options.uiButtons){
             this._handlers.buttonClick = (e) => {
                 e.stopPropagation();
@@ -765,7 +762,7 @@ function initVbooks(selector, options = {}) {
                 this._handlers[`button_${el.getAttribute('data')}`] = { el, handler: this._handlers.buttonClick, type: 'click' };
             });
         }
-        // TouchTracker
+        /* TouchTracker */
 
 		this.tracker = new TouchTracker(this.vb_body, { threshold: 5 });
         this._handlers.tracker = this.tracker;
@@ -820,7 +817,7 @@ function initVbooks(selector, options = {}) {
 		this.tracker.on("touchmove", (data) => {
             this.emit("touchMove",data);
 			this._removeClass('', 'prepos');
-			// Bewegung direkt in Rotation umwandeln
+			
 			// if (this.state == 'closed' && this.isDragging) {
             if (this.isDragging) {
 				let deltaX = data.x - touchX;
@@ -843,7 +840,7 @@ function initVbooks(selector, options = {}) {
     _unbindEvents() {
         if (!this._handlers) return;
 
-        // remove all DOM-Listener
+        /* remove all DOM-Listener */
         Object.keys(this._handlers).forEach((key) => {
             const h = this._handlers[key];
             if (h && h.el && h.handler && h.type) {
@@ -851,7 +848,7 @@ function initVbooks(selector, options = {}) {
             }
         });
 
-        // stop TouchTracker
+        /* stop TouchTracker */
         if (this._handlers.tracker && typeof this._handlers.tracker.destroy === 'function') {
             this._handlers.tracker.destroy();
         }
@@ -868,7 +865,7 @@ function initVbooks(selector, options = {}) {
         this.rotX += this.rotSpeedX;
         this.rotY += this.rotSpeedY;
 
-        // modulo 360 zur Stabilität
+        /* modulo 360 fo stability */
         if (this.rotX >= 360) this.rotX -= 360;
         if (this.rotY >= 360) this.rotY -= 360;
 
@@ -965,7 +962,7 @@ function initVbooks(selector, options = {}) {
         this._addClass('', 'closing');
         this.updateUI();
 
-		// reset oritentation
+		/* reset oritentation */
 		this._setStyles('.vb-body', 'transform', `rotateY(0deg) rotateX(0deg) translateX(0%)`);
 
 		this.rotX = 0;
@@ -1000,7 +997,7 @@ function initVbooks(selector, options = {}) {
 	/* keyboard stuff */
 
 	bookActive() {
-		// remove active states + keyhandler on all books arround
+		/* remove active states + keyhandler on all books arround */
 
 		document.querySelectorAll('.vbook').forEach(el => {
 			el.classList.remove('active');
@@ -1011,7 +1008,7 @@ function initVbooks(selector, options = {}) {
 			
 		});
 
-		// add key handler
+		/* add key handler */
 		this.book.classList.add('active');
 		this._keyHandler = (e) => {
 
@@ -1056,16 +1053,6 @@ function initVbooks(selector, options = {}) {
 
 		this.emit("active");
 	}
-	/*
-	bookBlur() {
-	  this.book.classList.remove('active');		
-	  if (this._keyHandler) {
-		document.removeEventListener("keydown", this._keyHandler);
-		this._keyHandler = null;
-	  }
-	}
-	*/
-
 }
 
 
@@ -1087,7 +1074,7 @@ class TouchTracker {
 		this.moved = false;
 		this.threshold = options.threshold || 5;
 
-		// Bound handlers for later removal
+		/* Bound handlers for later removal */
 		this._touchMove = (e) => this.move(e.touches, true, e);
 		this._touchEnd = () => this._endHandler(true);
 		this._mouseMove = (e) => this.move([{ clientX: e.clientX, clientY: e.clientY }], false);
@@ -1096,7 +1083,7 @@ class TouchTracker {
 		this.init();
 	}
 
-	// --- Event system ---
+	/* --- Event system --- */
 	on(eventName, handler) {
 		if (!this.events[eventName]) this.events[eventName] = [];
 		this.events[eventName].push(handler);
@@ -1114,7 +1101,7 @@ class TouchTracker {
 		}
 	}
 
-	// --- Initialization ---
+	/* --- Initialization ---  */
 	init() {
 		// Bound start handlers (so they can be removed later)
 		this._boundTouchStart = (e) => {
@@ -1134,7 +1121,7 @@ class TouchTracker {
 		this.el.addEventListener("mousedown", this._boundMouseStart);
 	}
 
-	// --- Touch / mouse start ---
+	/* --- Touch / mouse start --- */
 	start(points, isTouch = true) {
 		const now = Date.now();
 		const pts = Array.from(points);
@@ -1157,7 +1144,7 @@ class TouchTracker {
 		});
 	}
 
-	// --- Movement ---
+	/* --- Movement --- */
 	move(points, isTouch = true, event) {
 		if (event) event.preventDefault();
 
@@ -1196,7 +1183,7 @@ class TouchTracker {
 		}
 	}
 
-	// --- Touch / mouse end ---
+	/* --- Touch / mouse end --- */
 	_endHandler(isTouch) {
 		this.end(isTouch);
 
@@ -1244,7 +1231,7 @@ class TouchTracker {
 		}
 	}
 
-	// --- Direction detection ---
+	/* --- Direction detection --- */
 	getDirection(dx, dy) {
 		if (Math.abs(dx) > Math.abs(dy)) {
 			return dx > 0 ? "right" : "left";
@@ -1253,7 +1240,7 @@ class TouchTracker {
 		}
 	}
 
-	// --- Cleanup ---
+	/* --- Cleanup --- */
 	destroy() {
 		// Remove global listeners
 		document.removeEventListener("touchmove", this._touchMove);
