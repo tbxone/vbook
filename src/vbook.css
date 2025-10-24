@@ -1,0 +1,569 @@
+/*
+
+CSS for a virtual Book 
+©2025 Thomas Bircher @ Claudiabasel
+
+*/
+*{
+	box-sizing: border-box;
+}
+
+.vbook {
+	position: relative;
+    height:100%;
+	width:100%; 
+	display:flex;
+	align-items: center;
+	justify-content: center; 
+	font-size: 5vh;
+    overflow: hidden;
+}
+.vbook.active {
+    background:rgba(0,0,0,0.02);
+}
+/*
+.vbook.move {
+	width:100%;
+	aspect-ratio:auto;
+}
+*/
+.vbook .vb-book{
+	position: relative;
+    height: calc(90% - 4rem);
+    aspect-ratio:0.7;
+	perspective: 3000px;
+	 -webkit-perspective: 3000px;
+	font-size:inherit;
+    cursor: pointer;
+	touch-action: none;
+}		      
+.vbook .vb-body {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	transform-style: preserve-3d;
+	-webkit-transform-style: preserve-3d; 
+	transform: rotateX(0deg) rotateY(0deg);
+    will-change: transform;
+	display: flex;
+	justify-content: center;
+	align-items:center;
+	font-size: inherit;
+}
+.vbook .vb-body *{
+	user-select: none;
+}
+.vbook.opening .vb-body,
+.vbook.closing .vb-body{
+    transition: all 1s; 
+}
+.vbook .vb-body.drag, .vbook.resizing .vb-body {
+    transition: all 0s;    
+}
+.vb-face {
+  	position: absolute;
+}
+.vb-face > img, .vb-page img{
+  	position: absolute !important;
+	top:0px !important;
+	left:0px !important;
+	width:100% !important;
+	height:100% !important;
+	pointer-events: none;
+}
+.vb-body > .vb-face{
+	transform-style: preserve-3d;
+	display: flex;
+	justify-content: center;
+	align-items:center;
+}		
+.vb-cover{
+	font-size:inherit;
+}	
+.vb-cover > .vb-face{
+	background-color:rgba(210,210,210,1);
+	background-size:cover;
+}
+
+/* cover page*/
+.vb-cover .vb-page > div{
+	backface-visibility: visible;
+	-webkit-backface-visibility: visible;
+}
+		
+/* cube book --------------------------*/
+		
+/* vb-front & vb-back */
+.vb-body > .vb-front, .vb-body > .vb-back {
+	width: 100%;
+	height: 100%;
+}
+
+.vb-body > .vb-front  { transform: translateZ(0.5em); } /* Move forward */
+.vb-body > .vb-back   { transform: rotateY(180deg) translateZ(0.5em); } /* Move vb-backward */
+
+.vb-body > .vb-front{
+    transform-origin: top left;
+}
+
+/* vb-left & vb-right */
+.vb-body > .vb-left, .vb-body > .vb-right {
+	width: 1em;
+	height: 100%;
+}
+
+.vb-body > .vb-left  { transform: rotateY(-90deg) translateZ(calc(40vh * 0.8));}
+
+/* vb-top & vb-bottom */
+.vb-body > .vb-top, .vb-body > .vb-bottom {
+	width: 100%;
+	height: 1em;
+}
+
+.vb-body > .vb-top    { transform: rotateX(90deg ) translateZ(40vh); }
+.vb-body > .vb-bottom { transform: rotateX(-90deg) translateZ(40vh); }
+
+/* inner body --------------------------- */
+		
+.vb-body > .inner.vb-top, .vb-body > .inner.vb-bottom{
+    height: 1em;
+    width: calc(100% - 1vh);
+}
+.vb-body > .inner.vb-top    { transform: rotateX(90deg ) rotateZ(0deg ) translateZ(39.5vh); }
+.vb-body > .inner.vb-bottom { transform: rotateX(-90deg) rotateZ(0deg ) translateZ(39.5vh); }	
+
+.vb-body > .inner.vb-right{
+    transform: rotateY(90deg) rotateZ(90deg) translateZ(calc(39.4vh * 0.8));
+	height: 1em;
+}
+	
+.vb-face.inner{
+	background:rgba(255,255,255,1);
+}
+
+/* vb-pages -------------------------------- */
+
+.vb-body .vb-pages {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	transform-style: preserve-3d;
+	transform: translateZ(0.5em); /* Move forward */
+	transform-origin: top left;
+	display: flex;
+	align-items:center;
+}
+.vb-body .vb-page {
+	position: absolute;
+	width: 100%;
+	height: calc(100% - 1vh);	
+	transform-style: preserve-3d;
+	transform: translateZ(1px); /* Move forward */
+	transform-origin: top left;
+}
+.vb-body .vb-page > div{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	backface-visibility: hidden;
+	-webkit-backface-visibility: hidden;
+	background-repeat: no-repeat;
+	background-size:cover;
+}		
+.vb-body .vb-page > .vb-back{
+	transform: rotateY(180deg);
+	z-index: 200;	
+	background-color:rgba(255,250,250,1);
+}
+.vb-body .vb-page > .vb-front{
+	z-index: 100;
+	background-color:rgba(255,250,250,1);
+}
+.vb-body .vb-page.flip{
+	transform:translateZ(1px) rotate3d(0,1,0,-179.9deg);		
+}
+		
+.vbook.open .vb-body > .vb-page {	
+	display: block;
+}
+		
+/* cover cubes -------------------------- */
+		
+/* vb-front & vb-back */
+.vb-cover > div{
+	display: flex;
+	align-items: center;
+}
+.vb-cover .vb-front, .vb-cover .vb-back {
+	width: 100%;
+	height: 100%;
+}
+.vb-cover .vb-front  { transform: translateZ(0.2vh); } /* Move forward */
+.vb-cover .vb-back   { transform: rotateY(180deg) translateZ(0.2vh); } /* Move vb-backward */
+
+/* vb-left & vb-right */
+.vb-cover .vb-left, .vb-cover .vb-right {
+	width: 0.4vh;
+	height: 100%;
+}
+
+.vb-cover .vb-left  { transform: rotateY(-90deg) translateZ(calc(40vh * 0.8));}
+.vb-cover .vb-right { transform: rotateY(90deg) translateZ(calc(40vh * 0.8));}
+		
+.vb-right .vb-cover .vb-left  {  transform:translateZ(calc(20vh * 0.8));}
+.vb-right .vb-cover .vb-right {  transform:translateZ(calc(20vh * 0.8));}
+
+
+/* vb-top & vb-bottom */
+.vb-cover .vb-top, .vb-cover .vb-bottom {
+	width: 100%;
+	height: 0.4vh;
+}
+		
+.vb-cover .vb-top    { transform: rotateX(90deg ) translateZ(calc(40vh)); }
+.vb-cover .vb-bottom { transform: rotateX(-90deg) translateZ(calc(40vh)); }
+
+/* bgs */
+.vb-cover .vb-page > div{
+	backface-visibility: visible;
+	-webkit-backface-visibility: visible;
+}
+.vb-cover.vb-back .vb-page > div{
+	right:0px;
+}
+		
+/*  cover soft ------------------------------- */	
+		
+/* inner body  
+		
+.vbook.soft .vb-body > .inner.vb-top, .vbook.soft .vb-body > .inner.vb-bottom{
+	width: calc(100%);	
+}
+.vbook.soft .vb-body > .inner.vb-top    { transform: rotateX(90deg ) translateZ(40vh); }
+.vbook.soft .vb-body > .inner.vb-bottom { transform: rotateX(-90deg) translateZ(40vh); }	
+		
+.vbook.soft .vb-body > .inner.vb-right{
+	height: calc(100%);
+}
+.vbook.soft .vb-body > .inner.vb-right    { transform: rotateY(90deg) translateZ(calc(40vh * 0.8));}
+		
+/* vb-pages  
+		
+.vbook.soft .vb-body > .vb-page {	
+	height: 100%;	
+}
+.vbook.soft .vb-body > .vb-page > div{
+	width: 100%;
+}		
+
+/* cover cubes - 
+		
+.vbook.soft .vb-cover .vb-front  { transform: translateZ(1px); } 
+.vbook.soft .vb-cover .vb-back   { transform: rotateY(180deg) translateZ(1px); }
+
+.vbook.soft .vb-cover .vb-left, .vbook.soft .vb-cover .vb-right {
+	width: 1px;
+}
+.vbook.soft .vb-cover .vb-top, .vbook.soft .vb-cover .vb-bottom {
+	height: 1px;
+}	
+		
+/*  cover hard1 ------------------------------- */
+		
+/* inner body  */
+/*		
+.vbook.hard1 .vb-body > .inner.vb-top, .vbook.hard1 .vb-body > .inner.vb-bottom{
+	width: calc(99.9%);	
+}
+.vbook.hard1 .vb-body > .inner.vb-top    { transform: rotateX(90deg ) translateZ(39.9vh); }
+.vbook.hard1 .vb-body > .inner.vb-bottom { transform: rotateX(-90deg) translateZ(39.9vh); }	
+		
+.vbook.hard1 .vb-body > .inner.vb-right{
+	height: calc(99.9%);
+}
+.vbook.hard1 .vb-body > .inner.vb-right    { transform: rotateY(90deg) translateZ(calc(39.9vh * 0.8));}
+*/		
+/* vb-pages  */
+/*		
+.vbook.hard1 .vb-body > .vb-page {	
+	height: 99.9%;	
+}
+.vbook.hard1 .vb-body > .vb-page > div{
+	width: 99.9%;
+}		
+*/		
+/* cover cubes - */
+/*		
+.vbook.hard1 .vb-cover .vb-front  { transform: translateZ(0.4vh); } 
+.vbook.hard1 .vb-cover .vb-back   { transform: rotateY(180deg) translateZ(0.4vh); }
+
+.vbook.hard1 .vb-cover .vb-left, .vbook.hard1 .vb-cover .vb-right {
+	width: 0.8vh;
+}
+.vbook.hard1 .vb-cover .vb-top, .vbook.hard1 .vb-cover .vb-bottom {
+	height: 0.8vh;
+}	
+*/
+.vbook .prehide{
+	display:none !important;
+}
+.vbook.open .prehide, .vbook.closing .prehide{
+	display:flex !important;
+}
+
+/* vbook effects */
+
+.vb-body > .vb-left > .vb-front:after,
+.vb-cover .vb-top:after,
+.vb-cover .vb-bottom:after,
+.vb-cover .vb-left:after,
+.vb-cover .vb-right:after,
+.vb-cover .vb-back:after,
+.vb-body > .vb-face.inner.vb-right:after,
+.vb-body > .vb-face.inner.vb-bottom:after
+{
+	position: absolute;
+	top:0px;
+	left:0px;
+	width:100%;
+	height:100%;
+	mix-blend-mode: multiply;
+	content:'';
+}
+.vb-cover .vb-top:after{
+	mix-blend-mode: normal;
+	background:rgba(255,255,255,0.2);
+}
+.vb-cover .vb-bottom:after{
+	background:rgba(0,0,0,0.05);
+}
+.vb-cover.vb-left:after{
+	background:rgba(0,0,0,0.075);
+}
+.vb-cover.vb-front .vb-left:after,
+.vb-cover.vb-back .vb-right:after
+{
+	background:rgba(0,0,0,0.05);
+}
+.vb-body > .vb-face.inner.vb-right:after{
+	background:rgba(0,0,0,0.025);
+}			
+.vb-body > .vb-face.inner.vb-bottom:after{
+	background:rgba(0,0,0,0.05);
+}
+
+
+/* front/back rillen */
+    
+/* spine */
+.vb-body > .vb-left > .vb-front:after {
+	background:rgba(0,0,0,0.05);
+}
+	
+/* pages */
+.vb-body .vb-page > .vb-back:after {
+	content: '';
+    position: absolute;
+	top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+	background: linear-gradient(-90deg, rgba(0,0,0,0.03) 0%, rgba(0,0,0,0.02) 2%, rgba(0,0,0,0) 30%) ;
+	mix-blend-mode: multiply;
+}
+.vb-body .vb-page > .vb-front:after {
+	content: '';
+    position: absolute;
+	top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.02) 5%, rgba(0,0,0,0) 30%) ;
+    border-left:1px solid rgba(0,0,0,0.1);
+    mix-blend-mode: multiply;
+}
+		
+	
+/* book states ------------------------------- */
+
+.vbook.closing .vb-body > *,
+.vbook.opening .vb-body > *,
+.vbook.closing .vb-body .vb-page,
+.vbook.opening .vb-body .vb-page,
+.vbook.open .vb-body .vb-page
+{
+    transition:  transform 1s;   
+}
+.vbook.open .vb-body .vb-page{
+    
+}
+
+.vbook.open .vb-body{
+    transform: translateX(50%);
+}	
+.vbook.open .vb-body > .vb-front{
+    transform: rotateY(-179.9deg) translateZ(0em) !important; /* open cover, move to z=0 */
+}
+.vbook.open .vb-body > .vb-back{
+    transform: rotateY(180deg) translateZ(0em) !important; /*  move to z=0 */
+}
+
+.vbook.opening .vb-body > .vb-left,
+.vbook.closing .vb-body > .vb-left
+{
+    transition:width 1.1s !important;
+}
+.vbook.open .vb-body > .vb-left{
+    width: 0em;
+}
+.vbook.opening .vb-body > .vb-left > .vb-right,
+.vbook.opening .vb-body > .vb-left > .vb-left,
+.vbook.closing .vb-body > .vb-left > .vb-right,
+.vbook.closing .vb-body > .vb-left > .vb-left
+{
+   transition:all 1.1s !important;
+}
+.vbook.open .vb-body > .vb-left > .vb-right{
+    transform: rotateY(90deg) translateZ(0px) !important;
+}
+.vbook.open .vb-body > .vb-left > .vb-left
+{
+   transform: rotateY(-90deg) translateZ(0px) !important;
+}
+/* body */
+.vbook.open .vb-body > .vb-top.inner, 
+.vbook.open .vb-body > .vb-bottom.inner, 
+.vbook.open .vb-body > .inner.vb-right {
+	height: 0em;
+	opacity: 0;
+}
+.vbook.closing .vb-body > .vb-top.inner, 
+.vbook.closing .vb-body > .vb-bottom.inner, 
+.vbook.closing .vb-body > .inner.vb-right {
+	opacity: 0;
+}
+
+.vbook.prepos .vb-body{
+	//transition:all 2s;
+}
+
+/* buttons */
+.vbook .button{
+    position: absolute;
+    top:50%;
+    width:48px;
+    height:auto;
+    aspect-ratio:1;
+    border-radius:100%;
+    border:0px solid black;
+    background:none;
+    transform:translateY(-50%);
+    cursor:pointer;
+    transition: all 0.2s;
+}
+.vbook .button:hover{
+    background:rgba(0,0,0,0.1);   
+}
+.vbook button.left{
+    left:5%;
+}
+.vbook button.right{
+    right:5%;
+}
+/* pagination */
+
+.vbook .pagination{
+	position: absolute;
+	bottom:2.5%;
+	left:50%;
+    height:2rem;
+	transform: translateX(-50%) translateY(-50%);
+    line-height: 1rem;
+}
+.vbook .pagination .bullet{
+    display: inline-block;
+	position: relative;
+	width:12px;
+	height:16px;
+    cursor: pointer;
+    flex:1 0 16px;
+    transition: all 0.2s;
+}
+.vbook .pagination .bullet.hidden{
+    width:0px;
+}
+.vbook .pagination .bullet:after{
+	position: absolute;
+	top:50%;
+	left:50%;
+    transform: translateX(-50%) translateY(-50%);
+	width:6px;
+	height:6px;
+	border-radius: 100%;
+	background:black;
+	opacity: 0.2;
+    transition: all 0.5s;
+	content:'';
+}
+
+.vbook .pagination .bullet.on:after{
+	opacity: 1;
+}
+.vbook .pagination .bullet.hidden:after{
+    left:0%;
+    width:0px;
+	height:0px;
+	opacity: 0;
+    
+}
+.vbook .pagination .bullet:hover{
+    width:20px;
+}
+.vbook .pagination .bullet:hover:after{
+    opacity: 1;
+    width:8px;
+	height:8px;
+}
+
+.vbook .pageing{
+    position: absolute;
+    font-size:1rem;
+    top:1rem;
+    right:1rem;
+}
+/* icons */
+
+.icon {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: black;
+  stroke: rgba(0,0,0,0.3);
+  stroke-width: 2;       
+  fill: none;            
+}
+.icon:hover{
+	stroke: rgba(0,0,0,1);
+}
+
+.icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* wireframe mode */
+
+.vbook.wireframe .vb-cover .vb-face, .vbook.wireframe .vb-body > .inner, .vbook.wireframe .vb-body  .vb-page > div{
+    border:1px solid white;
+    background-color:rgba(255,255,255,0);
+}
+
+/* just for demo usage */
+
+body > .vbook{
+    height:100vh;
+}
