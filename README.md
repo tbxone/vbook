@@ -1,16 +1,17 @@
-# My JS Library
+# vbook.js
 
 A lightweight JavaScript class for creating virtual books on any website.
 
+
+
 ## Features
+- create interactive books (trunable 3d model, flip pages)
+- easy customisation: book dimentations, cover thikness, colors, images and many more.
 - pure JavaScript and CSS
-- no dependensices
+- no dependencies
 - built for easy setup and integration
 
-## Installation
 
-You can use it directly via a `<script>` tag:
 
-```html
-<link rel="stylesheet" href="src/vbook.css">
-<script src="src/vbook.js"></script>
+## Documentation
+For full documentation visit [https://vbookjs.com](https://vbookjs.com).
