@@ -1,4 +1,8 @@
 {
+ 
+  "name": "vbook",
+  "version": "0.1.2",
+ 
   "scripts": {
     "build": "npm run build:js && npm run build:css",
     "build:js": "terser src/vbook.js -o dist/vbook.min.js -c -m",
