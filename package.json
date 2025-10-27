@@ -13,7 +13,7 @@
   "build:js": "terser src/vbook.js -o dist/vbook.min.js -c -m",
  
    
-  "build:css": "postcss src/vbook.css -o dist/vbook.min.css --use cssnano"
+  "build:css": "postcss src/vbook.css -o dist/vbook.min.css --use cssnano --no-map"
  
   },
  
