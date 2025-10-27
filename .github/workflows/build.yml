@@ -35,17 +35,13 @@ jobs:
       # create zip archive of dist and demo folder
       - name: Create stable ZIP
         run: |
-          mkdir release-zip
-          cp dist/vbook.min.css release-zip/
-          cp dist/vbook.min.js release-zip/
-          cp -r demo release-zip/
-          zip -r vbook-latest.zip release-zip
+          zip -r vbook-latest.zip dist/vbook.min.css dist/vbook.min.js demo
           
       # Upload ZIP to GitHub Release
       - name: Upload ZIP to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: vbook-stable.zip
+          files: vbook-latest.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
