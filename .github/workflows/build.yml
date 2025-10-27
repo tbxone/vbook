@@ -1,11 +1,10 @@
-name: Build Minified Files
+name: Build and Attach Stable ZIP
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-    
+    tags:
+      - 'v*'
+
 permissions:
   contents: write
 
@@ -14,15 +13,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      # build minified files based on package.json
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          persist-credentials: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'  # or whatever version you use
+          node-version: 22
 
       - name: Install dependencies
         run: npm ci
@@ -30,16 +28,34 @@ jobs:
       - name: Build minified files
         run: npm run build
 
-      - name: Upload dist folder as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist-files
-          path: dist/
+      # copy package.public.json as package.json to dist
+      - name: Copy minimal package.json
+        run: cp package.public.json dist/package.json
 
-      - name: Commit and push dist files
+      # create zip archive of dist and demo folder
+      - name: Create stable ZIP
         run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "actions@github.com"
-          git add dist/
-          git commit -m "Build: update minified files [skip ci]" || echo "No changes"
-          git push     
+          mkdir release-zip
+          cp dist/vbook.min.css release-zip/
+          cp dist/vbook.min.js release-zip/
+          cp -r demo release-zip/
+          zip -r vbook-latest.zip release-zip
+          
+      # Upload ZIP to GitHub Release
+      - name: Upload ZIP to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: vbook-stable.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 8️⃣ (Optional) Commit built files to main
+      # Falls du möchtest, dass dist/ auch im Repo landet:
+      #- name: Commit and push dist to main
+      #    if: ${{ false }} # auf true ändern, wenn du das möchtest
+      #    run: |
+    #      git config --global user.name "GitHub Action"
+    #      git config --global user.email "actions@github.com"
+    #      git add dist/
+    #      git commit -m "Build: update dist files for $GITHUB_REF [skip ci]" || echo "No changes"
+    #      git push origin main
