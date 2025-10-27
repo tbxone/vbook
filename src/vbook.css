@@ -49,6 +49,7 @@ CSS for a virtual Book
 	justify-content: center;
 	align-items:center;
 	font-size: inherit;
+    transition: all 0.5s ease-in-out; 
 }
 .vbook .vb-body *{
 	user-select: none;
@@ -57,7 +58,7 @@ CSS for a virtual Book
 .vbook.closing .vb-body{
     transition: all 1s; 
 }
-.vbook .vb-body.drag, .vbook.resizing .vb-body {
+.vbook .vb-body.drag, .vbook.resizing .vb-body, .vbook.animate .vb-body {
     transition: all 0s;    
 }
 .vb-face {
@@ -89,6 +90,7 @@ CSS for a virtual Book
 .vb-cover .vb-page > div{
 	backface-visibility: visible;
 	-webkit-backface-visibility: visible;
+   
 }
 		
 /* cube book --------------------------*/
@@ -160,6 +162,7 @@ CSS for a virtual Book
 	transform-style: preserve-3d;
 	transform: translateZ(1px); /* Move forward */
 	transform-origin: top left;
+    font-size:1rem;
 }
 .vb-body .vb-page > div{
 	position: absolute;
@@ -232,78 +235,6 @@ CSS for a virtual Book
 	right:0px;
 }
 		
-/*  cover soft ------------------------------- */	
-		
-/* inner body  
-		
-.vbook.soft .vb-body > .inner.vb-top, .vbook.soft .vb-body > .inner.vb-bottom{
-	width: calc(100%);	
-}
-.vbook.soft .vb-body > .inner.vb-top    { transform: rotateX(90deg ) translateZ(40vh); }
-.vbook.soft .vb-body > .inner.vb-bottom { transform: rotateX(-90deg) translateZ(40vh); }	
-		
-.vbook.soft .vb-body > .inner.vb-right{
-	height: calc(100%);
-}
-.vbook.soft .vb-body > .inner.vb-right    { transform: rotateY(90deg) translateZ(calc(40vh * 0.8));}
-		
-/* vb-pages  
-		
-.vbook.soft .vb-body > .vb-page {	
-	height: 100%;	
-}
-.vbook.soft .vb-body > .vb-page > div{
-	width: 100%;
-}		
-
-/* cover cubes - 
-		
-.vbook.soft .vb-cover .vb-front  { transform: translateZ(1px); } 
-.vbook.soft .vb-cover .vb-back   { transform: rotateY(180deg) translateZ(1px); }
-
-.vbook.soft .vb-cover .vb-left, .vbook.soft .vb-cover .vb-right {
-	width: 1px;
-}
-.vbook.soft .vb-cover .vb-top, .vbook.soft .vb-cover .vb-bottom {
-	height: 1px;
-}	
-		
-/*  cover hard1 ------------------------------- */
-		
-/* inner body  */
-/*		
-.vbook.hard1 .vb-body > .inner.vb-top, .vbook.hard1 .vb-body > .inner.vb-bottom{
-	width: calc(99.9%);	
-}
-.vbook.hard1 .vb-body > .inner.vb-top    { transform: rotateX(90deg ) translateZ(39.9vh); }
-.vbook.hard1 .vb-body > .inner.vb-bottom { transform: rotateX(-90deg) translateZ(39.9vh); }	
-		
-.vbook.hard1 .vb-body > .inner.vb-right{
-	height: calc(99.9%);
-}
-.vbook.hard1 .vb-body > .inner.vb-right    { transform: rotateY(90deg) translateZ(calc(39.9vh * 0.8));}
-*/		
-/* vb-pages  */
-/*		
-.vbook.hard1 .vb-body > .vb-page {	
-	height: 99.9%;	
-}
-.vbook.hard1 .vb-body > .vb-page > div{
-	width: 99.9%;
-}		
-*/		
-/* cover cubes - */
-/*		
-.vbook.hard1 .vb-cover .vb-front  { transform: translateZ(0.4vh); } 
-.vbook.hard1 .vb-cover .vb-back   { transform: rotateY(180deg) translateZ(0.4vh); }
-
-.vbook.hard1 .vb-cover .vb-left, .vbook.hard1 .vb-cover .vb-right {
-	width: 0.8vh;
-}
-.vbook.hard1 .vb-cover .vb-top, .vbook.hard1 .vb-cover .vb-bottom {
-	height: 0.8vh;
-}	
-*/
 .vbook .prehide{
 	display:none !important;
 }
@@ -311,7 +242,7 @@ CSS for a virtual Book
 	display:flex !important;
 }
 
-/* vbook effects */
+/* vbook 3d shade effects //////////////////////////// */
 
 .vb-body > .vb-left > .vb-front:after,
 .vb-cover .vb-top:after,
@@ -337,6 +268,22 @@ CSS for a virtual Book
 .vb-cover .vb-bottom:after{
 	background:rgba(0,0,0,0.05);
 }
+/*cover inner shadow*/
+.vb-cover.vb-back .vb-back:after{
+    background:linear-gradient(90deg,rgba(0, 0, 0, 0.05) 0%, rgba(0,0 , 0, 0.15) 100%);
+    transition: all 1s;
+}
+.vb-cover.vb-left .vb-back:after{
+    background:linear-gradient(90deg,rgba(0, 0, 0, 0.15) 0%, rgba(0, 0 , 0, 0.15) 100%);
+    transition: all 1s;
+}
+.vb-cover.vb-front .vb-back:after{
+    background:linear-gradient(90deg,rgba(0, 0, 0, 0.15) 0%, rgba(0,0 , 0, 0.05) 100%);
+    transition: all 1s;
+}
+
+/* button left/right shadow*/
+
 .vb-cover.vb-left:after{
 	background:rgba(0,0,0,0.075);
 }
@@ -386,7 +333,7 @@ CSS for a virtual Book
 }
 		
 	
-/* book states ------------------------------- */
+/* book states //////////////////////////// */
 
 .vbook.closing .vb-body > *,
 .vbook.opening .vb-body > *,
@@ -445,11 +392,19 @@ CSS for a virtual Book
 	opacity: 0;
 }
 
-.vbook.prepos .vb-body{
-	//transition:all 2s;
+/*cover inner shadow*/
+.vbook.open .vb-cover.vb-back .vb-back:after{
+    opacity: 0;
+}
+.vbook.open .vb-cover.vb-left .vb-back:after{
+    opacity: 0;
+}
+.vbook.open .vb-cover.vb-front .vb-back:after{
+    opacity: 0;
 }
 
-/* buttons */
+/* buttons //////////////////////////// */
+
 .vbook .button{
     position: absolute;
     top:50%;
@@ -472,7 +427,8 @@ CSS for a virtual Book
 .vbook button.right{
     right:5%;
 }
-/* pagination */
+
+/* pagination //////////////////////////// */
 
 .vbook .pagination{
 	position: absolute;
@@ -533,6 +489,7 @@ CSS for a virtual Book
     top:1rem;
     right:1rem;
 }
+
 /* icons */
 
 .icon {

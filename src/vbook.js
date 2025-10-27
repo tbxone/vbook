@@ -1,4 +1,4 @@
-/* --- the wrapper --- */
+// the wrapper
 
 function initVbooks(selector, options = {}) {
 	const els = document.querySelectorAll(selector);
@@ -15,7 +15,7 @@ function initVbooks(selector, options = {}) {
 }
 
 
-/* --- the core --- */
+// the core
 
 (function (global, factory) {
   if (typeof module === "object" && typeof module.exports === "object") {
@@ -54,22 +54,34 @@ function initVbooks(selector, options = {}) {
 			spine: 40,
             
 			coverThikness: 2,
-			coverColor: "#999",
-			spineThikness: 2,
-			spineColor: "#999",
+			coverColor: "#666",
+          
+            
 			pagesOffset: 2,
-			pages: 20,
+			pages: 0,
 			pagesColor: "#fff",
 			
             // images
+            content: {
+                front: {},
+                back: {},
+                spine: {},
+                head: {},
+                fore: {},
+                tail: {},
+                pages: {}
+            },
+            
+           
+            /*
             book_img_cover: {},
 			book_img_back: {},
 			book_img_spine: {},
-			book_img_pages_top: '',
-			book_img_pages_side: '',
-			book_img_pages_bottom: '',
+			book_img_pages_top: 'book/head_r2.png',
+			book_img_pages_side: 'book/head_r2.png',
+			book_img_pages_bottom: 'book/head_r2.png',
 			book_img_pages: {},
-            
+            */
             // book shadows
             
             // initial book rotation
@@ -89,7 +101,7 @@ function initVbooks(selector, options = {}) {
             //ui
 			uiButtons: true,
 			uiPagination: true,
-            uiPaginationLimit: 9,
+            uiPaginationLimit: 0,
             uiPageing: true,
             uiPageingDiv: '/',
             
@@ -99,10 +111,14 @@ function initVbooks(selector, options = {}) {
             
         
         this.options = Object.assign({}, defaults, datasetOptions, options);
-		this._parseImages();
+		this._parseHtml();
 
-		
-
+		this.options.spineThikness ||= this.options.coverThikness;
+        this.options.backThikness ||= this.options.coverThikness;
+        
+        this.options.spineColor ||= this.options.coverColor;
+        this.options.backColor ||= this.options.coverColor;
+        
 		// icons
 
 		this.icon_arrow_right = `<svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -214,7 +230,7 @@ function initVbooks(selector, options = {}) {
 	}
 	
 
-	/* =============== Overwrite lifecycle hooks =============== */
+	// =============== Overwrite lifecycle hooks ===============
 	
 	_init() {
         this.emit("initBefore");
@@ -224,9 +240,7 @@ function initVbooks(selector, options = {}) {
 		this.rotY  = this.options.rotateX;
 		this.rotX  = this.options.rotateY;
         this.rotZ  = this.options.rotateZ;
-        this.pages = this.options.pages;
 		this.page_current = -1;
-		this.page_count = this.options.pages;
 		this.page_z = 0;
 		this.state = 'closed';
         this.rotSpeedX = 0;
@@ -243,6 +257,7 @@ function initVbooks(selector, options = {}) {
         this._removeClass('', 'disabled');
         this._removeClass('', 'hover');
         
+        //this._content();
         // html
         
         this.book.innerHTML = `
@@ -258,13 +273,22 @@ function initVbooks(selector, options = {}) {
             ${this._getUI()}
         `;
 		this.vb_body = this.book.querySelector('.vb-book');
-
-		// set the colors
-
-		this._setStyles(".vb-cover .vb-face", "background-color", this.options.coverColor);
+        
+        // set pages zindex
+        let pages = this.vb_body.querySelectorAll(".vb-page");
+        this.page_z = pages.length;
+        if(pages.length > 0){
+            for (let i = 0; i < pages.length; i++) {
+                pages[i].style['z-index'] = pages.length -i;
+            }
+        }
+        
+        //this.options.spineColor ?
+        
+		this._setStyles(".vb-cover.vb-front .vb-face", "background-color", this.options.coverColor);
+        this._setStyles(".vb-cover.vb-back .vb-face", "background-color", this.options.backColor);
 		this._setStyles(".vb-cover.vb-left .vb-face", "background-color", this.options.spineColor);
 		this._setStyles(".vb-face.inner", "background-color", this.options.pagesColor);
-		this._setStyles(".vb-page > div", "background-color", this.options.pagesColor);
 
 		// set rotation
             
@@ -288,7 +312,7 @@ function initVbooks(selector, options = {}) {
 	}
 
 	// some utilites -------------------------
-
+    
 	_applyTo(selector, fn) {
 		if (selector) {
 			this.book.querySelectorAll(selector).forEach(fn);
@@ -314,28 +338,41 @@ function initVbooks(selector, options = {}) {
         return result;
     }
     
-	_parseImages() {
+	_parseHtml() {
 		// Covers
-		const front = this.book.querySelector(".cover.front");
-		const back = this.book.querySelector(".cover.back");
-		const spine = this.book.querySelector(".cover.spine");
-
-		this.options.book_img_cover = front?.dataset.src || "";
-		this.options.book_img_back = back?.dataset.src || "";
-		this.options.book_img_spine = spine?.dataset.src || "";
+        const front = this.book.querySelector(".front");
+		const back = this.book.querySelector(".back");
+		const spine = this.book.querySelector(".spine");
+        
+        this.options.content.front.img = front?.dataset.img || "";
+        this.options.content.back.img = back?.dataset.img || "";
+        this.options.content.spine.img = spine?.dataset.img || "";
 
 		// Edges (pages)
-		const head = this.book.querySelector(".edge.head");
-		const tail = this.book.querySelector(".edge.tail");
-		const fore = this.book.querySelector(".edge.fore");
+		const head = this.book.querySelector(".head");
+		const tail = this.book.querySelector(".tail");
+		const fore = this.book.querySelector(".fore");
 
-		this.options.book_img_pages_top = head?.dataset.src || "";
-		this.options.book_img_pages_bottom = tail?.dataset.src || "";
-		this.options.book_img_pages_side = fore?.dataset.src || "";
+		this.options.content.head.img = head?.dataset.img || "";
+		this.options.content.tail.img = tail?.dataset.img || "";
+		this.options.content.fore.img = fore?.dataset.img || "";
 
 		// Individual pages (array)
 		const pages = this.book.querySelectorAll(".page");
-		this.options.book_img_pages = Array.from(pages).map(p => p.dataset.src || "");
+        if(pages.length > 0){
+            this.options.pages_html = pages.length;
+            this.options.pages = Math.ceil(pages.length / 2);
+            this.options.content.pages = Array.from(pages).map(p => ({
+                img: p.dataset.img || '',
+                color: p.dataset.color || '',
+                html: p.innerHTML || ''
+            }));
+        }else{
+            this.options.pages_html = 0;
+            this.options.pages = 0;
+            this.options.content.pages[0] =  {'img':'','color':'',html:''};
+        }
+                
 	}
 
 	_setStyles = (selector, property, value) => {
@@ -365,6 +402,7 @@ function initVbooks(selector, options = {}) {
 		this.spine_r = this.options.spine / this.h;
 		this.cover_depth_r = this.options.coverThikness / this.h;
 		this.spine_depth_r = this.options.spineThikness / this.h;
+        this.back_depth_r = this.options.backThikness / this.h;
 		this.page_offset_r = this.options.pagesOffset / this.h;
 		this._setStyles(".vb-book", "aspect-ratio", this.book_r);
 
@@ -387,9 +425,12 @@ function initVbooks(selector, options = {}) {
        
 		this.w = this.vb_body.getBoundingClientRect().width;
 		this.h = this.vb_body.getBoundingClientRect().height;
-		const bookThickness = this.h * this.spine_r;
-		const coverThickness = this.h * this.cover_depth_r;
-		const spineThickness = this.h * this.spine_depth_r;
+		const bookThickness   = this.h * this.spine_r;
+		const coverThickness  = this.h * this.cover_depth_r;
+		const spineThickness  = this.h * this.spine_depth_r;
+        const backThickness   = this.h * this.back_depth_r;
+        //const bodyThickness = (this.h * this.spine_r) - (2 * coverThickness);
+        const bodyThickness   = this.h * this.spine_r;
 		const pageOffset = this.h * this.page_offset_r;
 
 		// Helper-Funktion: sicheres Setzen
@@ -401,10 +442,10 @@ function initVbooks(selector, options = {}) {
 			});
 		};
 		// font size:
-		this.book.style.fontSize = bookThickness + 'px';
+		this.book.style.fontSize = bodyThickness + 'px';
 
-		setStyle('.vb-cover.vb-front', 'transform', `translateZ(${bookThickness / 2 + coverThickness / 2}px)`);
-		setStyle(".vb-cover.vb-back", "transform", `rotateY(180deg) translateZ(${bookThickness / 2 + coverThickness / 2}px)`);
+		setStyle('.vb-cover.vb-front', 'transform', `translateZ(${bodyThickness / 2 + coverThickness / 2}px)`);
+		setStyle(".vb-cover.vb-back", "transform", `rotateY(180deg) translateZ(${bodyThickness / 2 + backThickness / 2}px)`);
         //setStyle(".vb-cover.vb-back", "transform", `rotateY(180deg) translateZ(0.5em)`);
 		setStyle(".vb-cover.vb-left", "transform", `rotateY(-90deg) translateZ(${this.w / 2 + spineThickness / 2 - 0.1}px)`);
 
@@ -413,9 +454,7 @@ function initVbooks(selector, options = {}) {
 		setStyle(".vb-cover > .vb-front", "transform", `translateZ(${coverThickness / 2}px)`);
 		setStyle(".vb-cover > .vb-back", "transform", `translateZ(${-coverThickness / 2}px)`);
 
-		setStyle(".vb-cover.vb-left > .vb-front", "transform", `translateZ(${spineThickness / 2}px)`);
-		setStyle(".vb-cover.vb-left > .vb-back", "transform", `translateZ(${-spineThickness / 2}px)`);
-
+		
 		setStyle(".vb-cover > .vb-left", "width", `${coverThickness}px`);
 		setStyle(".vb-cover > .vb-left", "transform", `rotateY(-90deg) translateZ(${this.w / 2}px)`);
 		setStyle(".vb-cover > .vb-right", "width", `${coverThickness}px`);
@@ -425,12 +464,24 @@ function initVbooks(selector, options = {}) {
 		setStyle(".vb-cover > .vb-top", "transform", `rotateX(90deg) translateZ(${this.h / 2}px)`);
 		setStyle(".vb-cover > .vb-bottom", "height", `${coverThickness}px`);
 		setStyle(".vb-cover > .vb-bottom", "transform", `rotateX(-90deg) translateZ(${this.h / 2}px)`);
+        
+        //back
+        setStyle(".vb-cover.vb-back > .vb-front", "transform", `translateZ(${backThickness / 2}px)`);
+		setStyle(".vb-cover.vb-back > .vb-back", "transform", `translateZ(${-backThickness / 2}px)`);
+        
+        setStyle(".vb-cover.vb-back > .vb-left", "width", `${backThickness}px`);
+        setStyle(".vb-cover.vb-back > .vb-right", "width", `${backThickness}px`);
+        setStyle(".vb-cover.vb-back > .vb-top", "height", `${backThickness}px`);
+        setStyle(".vb-cover.vb-back > .vb-bottom", "height", `${backThickness}px`);
+		
+        //spine
+        setStyle(".vb-cover.vb-left > .vb-front", "transform", `translateZ(${spineThickness / 2}px)`);
+		setStyle(".vb-cover.vb-left > .vb-back", "transform", `translateZ(${-spineThickness / 2}px)`);
 
-		//spine
 		setStyle(".vb-cover.vb-left > .vb-left", "width", `${spineThickness}px`);
-		setStyle(".vb-cover.vb-left > .vb-left", "transform", `rotateY(-90deg) translateZ(${bookThickness / 2}px)`);
+		setStyle(".vb-cover.vb-left > .vb-left", "transform", `rotateY(-90deg) translateZ(${bodyThickness / 2}px)`);
 		setStyle(".vb-cover.vb-left > .vb-right", "width", `${spineThickness}px`);
-		setStyle(".vb-cover.vb-left > .vb-right", "transform", `rotateY(90deg) translateZ(${bookThickness / 2}px)`);
+		setStyle(".vb-cover.vb-left > .vb-right", "transform", `rotateY(90deg) translateZ(${bodyThickness / 2}px)`);
 
 		setStyle(".vb-cover.vb-left > .vb-top", "height", `${spineThickness}px`);
 		setStyle(".vb-cover.vb-left > .vb-bottom", "height", `${spineThickness}px`);
@@ -450,7 +501,7 @@ function initVbooks(selector, options = {}) {
 
 		setStyle(".vb-body .vb-page", "height", `${this.h - 2 * pageOffset - 1}px`);
 		setStyle(".vb-body .vb-page > div", "width", `${this.w - pageOffset - 1}px`);
-		setStyle(".vb-body .vb-pages", "transform", `translateZ(${0}px)`);
+		setStyle(".vb-body .vb-pages", "transform", `translateZ(${coverThickness/2 + 0.1}px)`);
         
         this.emit("resize");
 
@@ -467,7 +518,7 @@ function initVbooks(selector, options = {}) {
 		num += dir;
         console.log('pagedir:'+num)
         // num = last page close the book
-		if (num > this.page_count - 1) {
+		if (num > this.options.pages - 1) {
             if(this.options.pageClickLast == 'close'){
                 this.bookClosePages();
             }
@@ -502,12 +553,12 @@ function initVbooks(selector, options = {}) {
         if(this.state !='open'){
             return;
         }
-        /* limit num from 0 - 19 */
+        // limit num from 0 - 19
         if (num < 0) {
             num = 0;
         }
-        if (num > this.page_count - 1) {
-            num = this.page_count - 1;
+        if (num > this.options.pages - 1) {
+            num = this.options.pages - 1;
         }
         this.page_current = num;
         
@@ -515,13 +566,13 @@ function initVbooks(selector, options = {}) {
 
 		this.page_z++;
 
-		/* lift up the current page */
+		// lift up the current page
 		if (num > 0) {
 			let py = this.book.querySelectorAll('.vb-body .vb-pages .vb-page')[num-1];
 			py.style['z-index'] = this.page_z;
 		}
-		/* add/remove flip classes */  
-		for (let i = 0; i < this.page_count-1; i++) {
+		// add/remove flip classes   
+		for (let i = 0; i < this.options.pages-1; i++) {
 			let px = this.book.querySelectorAll('.vb-body .vb-pages .vb-page')[i];
 			if (i < num) {
 				px.classList.add('flip');
@@ -529,13 +580,13 @@ function initVbooks(selector, options = {}) {
 				px.classList.remove('flip');
 			}
 		}
-		/* repeat for closing all pages */
+		// repeat for closing all pages
 		if (this.closing == true) {
 			setTimeout(() => {
 				this.bookClosePages();
 			}, 50);
 		}
-		/* set pagination */
+		// set pagination
         this.updateUI();
         this.emit("pageFlip", { page: num });
 		this.emit("pageFlipAfter", { page: num });
@@ -555,30 +606,30 @@ function initVbooks(selector, options = {}) {
             let start = currentIndex - half;
             let end = currentIndex + half;
 
-            /* left limit */
+            // left limit
             if (start < 0) {
                 end += Math.abs(start);
                 start = 0;
             }
 
-            /* right limit */
-            if (end > this.pages - 1) {
-                const diff = end - (this.pages - 1);
+            // right limit
+            if (end > this.options.pages - 1) {
+                const diff = end - (this.options.pages - 1);
                 start -= diff;
-                end = this.pages - 1;
+                end = this.options.pages - 1;
                 if (start < 0) start = 0;
             }
 
             bullets.forEach((b, i) => {
-                /* remove all */
+                // remove all
                 b.classList.remove('on', 'hidden');
 
-                /* set current active */
+                // set current active
                 if (i === currentIndex) {
                     b.classList.add('on');
                 }
 
-                /* Dynamic visibility */
+                // Dynamic visibility
                 if (i < start || i > end) {
                     b.classList.add('hidden');
                 }
@@ -603,35 +654,33 @@ function initVbooks(selector, options = {}) {
 	// =====================
 
 	_getCover() {
+        
 		return `
 		  <div class="vb-face vb-cover vb-front">
-			<div class="vb-face vb-back ">
-			  ${lazyImg(this.options.book_img_cover, "lazyload", 50)}
-			  <div class="vb-page prehide">
-				<div class="vb-back ">${lazyImg(this.options.book_img_pages[0], "", 50)}</div>
-			  </div>
-			</div>
-			<div class="vb-face vb-front">${lazyImg(this.options.book_img_cover, "lazyload", 50)}</div>
+			<div class="vb-face vb-back">${this._getFirstLastPage(0)}</div>
+			<div class="vb-face vb-front">${this._lazyImg(this.options.content.front.img, "lazyload", 50)}</div>
 			${this._getDepthFaces(this.options.coverThikness)}
 		  </div>
 		`;
 	}
-
+   
 	// =====================
 	// Back Cover (Rückseite)
 	// =====================
 	_getBackCover() {
-		const lastPage = this.options.book_img_pages[this.options.book_img_pages.length - 1];
+        
+        let lastPageNum = '';
+        if(this.options.pages_html % 2 === 0){
+            lastPageNum = this.options.pages_html - 1;
+        }else{
+            lastPageNum = -1;
+        }
+        
 		return `
 		  <div class="vb-face vb-cover vb-back">
-			<div class="vb-face vb-back ">
-			  ${lazyImg(this.options.book_img_back, "lazyload", 50)}
-			  <div class="vb-page prehide">
-				<div class="vb-back">${lazyImg(lastPage, "")}</div>
-			  </div>
-			</div>
-			<div class="vb-face vb-front">${lazyImg(this.options.book_img_back, "lazyload", 50)}</div>
-			${this._getDepthFaces(this.options.coverThikness)}
+			<div class="vb-face vb-back">${this._getFirstLastPage(lastPageNum)}</div>
+			<div class="vb-face vb-front">${this._lazyImg(this.options.content.back.img, "lazyload", 50)}</div>
+			${this._getDepthFaces(this.options.backThikness)}
 		  </div>
 		`;
 	}
@@ -642,8 +691,8 @@ function initVbooks(selector, options = {}) {
 	_getSpine() {
 		return `
       <div class="vb-face vb-cover vb-left">
-        <div class="vb-face vb-front">${lazyImg(this.options.book_img_spine, "lazyload", 50)}</div>
-        <div class="vb-face vb-back">${lazyImg(this.options.book_img_spine, "lazyload", 50)}</div>
+        <div class="vb-face vb-front">${this._lazyImg(this.options.content.spine.img, "lazyload", 50)}</div>
+        <div class="vb-face vb-back"></div>
         ${this._getDepthFaces(this.options.spineThikness)}
       </div>
     `;
@@ -654,32 +703,63 @@ function initVbooks(selector, options = {}) {
 	// =====================
 	_getBodyFaces() {
 		return `
-      <div class="vb-face inner vb-right">${lazyImg(this.options.book_img_pages_side, "lazyload", 50)}</div>
-      <div class="vb-face inner vb-top">${lazyImg(this.options.book_img_pages_top, "lazyload", 50)}</div>
-      <div class="vb-face inner vb-bottom">${lazyImg(this.options.book_img_pages_bottom, "lazyload", 50)}</div>
+      <div class="vb-face inner vb-right">${this._lazyImg(this.options.content.fore.img, "lazyload", 50)}</div>
+      <div class="vb-face inner vb-top">${this._lazyImg(this.options.content.head.img, "lazyload", 50)}</div>
+      <div class="vb-face inner vb-bottom">${this._lazyImg(this.options.content.tail.img, "lazyload", 50)}</div>
     `;
 	}
 
 	// =====================
 	// Pages (Innenseiten)
 	// =====================
+     _getFirstLastPage(num) {
+        if(this.options.pages > 0){
+            let page = this.options?.content?.pages?.[num];
+            if(!page){
+                page = {color:'',img:''};
+            }
+            if(!page.color){
+                page.color = this.options.pagesColor;
+            }
+            return `
+            <div class="vb-page prehide">
+				<div class="vb-back" style="background-color:${page.color}">${this._lazyImg(page.img, "", 50)}${page.html}</div>
+            </div>
+            `;
+        }
+    }
+    
 	_getPages() {
 
 		const pages = this.options.pages;
-		let html = '';
-		for (let i = 0; i < pages - 1; i++) {
-			
+        if(pages == 0){
+            return '';
+        }
+        let html = '';
+		for (let i = 0; i < pages - 1; i++) {           
+            let front   = this.options.content.pages[i*2 + 1];
+            if(!front.color){
+                front.color = this.options.pagesColor;
+            }
+            let back    = this.options.content.pages[i*2 + 2];
+            if(!back.color){
+                back.color = this.options.pagesColor;
+            }
 			html += `
             <div class="vb-page">
-              <div class="vb-back">${lazyImg(this.options.book_img_pages[i + 1], "", 50)}</div>
-              <div class="vb-front">${lazyImg(this.options.book_img_pages[i], "", 50)}</div>
+              <div class="vb-back" style="background-color:${back.color}">${this._lazyImg(back.img, "", 50)}${back.html}</div>
+              <div class="vb-front" style="background-color:${back.color}">${this._lazyImg(front.img, "", 50)}${front.html}</div>
             </div>
           `;
-			
 		}
 		return `<div class="vb-pages prehide">${html}</div>`;
 
 	}
+ 
+    _lazyImg(src, className = "", size = 100) {
+	   if (!src) return "";
+	   return `<img src="${src}" class="${className}" loading="lazy" width="${size}%" alt="book image" />`;
+    }
 
 	// =====================
 	// UI
@@ -727,7 +807,7 @@ function initVbooks(selector, options = {}) {
 	_bindEvents() {
         this._handlers = this._handlers || {};
         
-        /* Pagination Clicks */
+        // Pagination Clicks
         if(this.options.uiPagination){
             this._handlers.paginationClick = (e, index) => {
                 if (this.state == 'closed') this.bookOpen();
@@ -739,7 +819,7 @@ function initVbooks(selector, options = {}) {
                 this._handlers[`pagination_${index}`] = { el, handler, type: 'click' };
             });
         }
-        /* Buttons */
+        // Buttons
         if(this.options.uiButtons){
             this._handlers.buttonClick = (e) => {
                 e.stopPropagation();
@@ -762,7 +842,7 @@ function initVbooks(selector, options = {}) {
                 this._handlers[`button_${el.getAttribute('data')}`] = { el, handler: this._handlers.buttonClick, type: 'click' };
             });
         }
-        /* TouchTracker */
+        // TouchTracker
 
 		this.tracker = new TouchTracker(this.vb_body, { threshold: 5 });
         this._handlers.tracker = this.tracker;
@@ -817,9 +897,8 @@ function initVbooks(selector, options = {}) {
 		this.tracker.on("touchmove", (data) => {
             this.emit("touchMove",data);
 			this._removeClass('', 'prepos');
-			
-			// if (this.state == 'closed' && this.isDragging) {
-            if (this.isDragging) {
+			// Bewegung direkt in Rotation umwandeln
+            if (this.state == 'closed' && this.isDragging) {
 				let deltaX = data.x - touchX;
 				let deltaY = data.y - touchY;
 				touchX = data.x;
@@ -840,7 +919,7 @@ function initVbooks(selector, options = {}) {
     _unbindEvents() {
         if (!this._handlers) return;
 
-        /* remove all DOM-Listener */
+        // remove all DOM-Listener
         Object.keys(this._handlers).forEach((key) => {
             const h = this._handlers[key];
             if (h && h.el && h.handler && h.type) {
@@ -848,7 +927,7 @@ function initVbooks(selector, options = {}) {
             }
         });
 
-        /* stop TouchTracker */
+        // stop TouchTracker
         if (this._handlers.tracker && typeof this._handlers.tracker.destroy === 'function') {
             this._handlers.tracker.destroy();
         }
@@ -859,18 +938,20 @@ function initVbooks(selector, options = {}) {
     
     rotateStop() {
         this.rotLoop = false;
+        this._removeClass('','animate');
     }
     
     animate(){
         this.rotX += this.rotSpeedX;
         this.rotY += this.rotSpeedY;
 
-        /* modulo 360 fo stability */
+        // modulo 360 zur Stabilität
         if (this.rotX >= 360) this.rotX -= 360;
         if (this.rotY >= 360) this.rotY -= 360;
 
         this._setStyles('.vb-body', 'transform', `rotateY(${this.rotX}deg) rotateX(${this.rotY}deg)`);
         if(this.rotLoop == true){
+            this._addClass('','animate');
             requestAnimationFrame(this.animate.bind(this));
         }
     }
@@ -924,7 +1005,7 @@ function initVbooks(selector, options = {}) {
     }
    
 	bookOpen() {
-		if(this.state != 'closed'){
+		if(this.state != 'closed' || this.options.pages == 0){
             return;
         }
         this.rotateStop();
@@ -962,7 +1043,7 @@ function initVbooks(selector, options = {}) {
         this._addClass('', 'closing');
         this.updateUI();
 
-		/* reset oritentation */
+		// reset oritentation
 		this._setStyles('.vb-body', 'transform', `rotateY(0deg) rotateX(0deg) translateX(0%)`);
 
 		this.rotX = 0;
@@ -978,10 +1059,10 @@ function initVbooks(selector, options = {}) {
 
 	bookCloseAfter() {
 
-		for (let i = 0; i < this.page_count; i++) {
+		for (let i = 0; i < this.options.pages; i++) {
 			let p = this.book.querySelectorAll('.vb-body .vb-pages .vb-page')[i];
             if(p){
-                p.style['z-index'] = this.page_count - i;
+                p.style['z-index'] = this.options.pages - i;
             }
 		}
 
@@ -997,7 +1078,7 @@ function initVbooks(selector, options = {}) {
 	/* keyboard stuff */
 
 	bookActive() {
-		/* remove active states + keyhandler on all books arround */
+		// remove active states + keyhandler on all books arround
 
 		document.querySelectorAll('.vbook').forEach(el => {
 			el.classList.remove('active');
@@ -1008,7 +1089,7 @@ function initVbooks(selector, options = {}) {
 			
 		});
 
-		/* add key handler */
+		// add key handler
 		this.book.classList.add('active');
 		this._keyHandler = (e) => {
 
@@ -1053,15 +1134,22 @@ function initVbooks(selector, options = {}) {
 
 		this.emit("active");
 	}
+	/*
+	bookBlur() {
+	  this.book.classList.remove('active');		
+	  if (this._keyHandler) {
+		document.removeEventListener("keydown", this._keyHandler);
+		this._keyHandler = null;
+	  }
+	}
+	*/
+
 }
 
 
 /* ------------------ helper function -------------------- */
 
-function lazyImg(src, className = "", size = 100) {
-	if (!src) return "";
-	return `<img src="${src}" class="${className}" loading="lazy" width="${size}%" alt="book image" />`;
-}
+
 
 /* ------------------ mouse/finger tracking -------------------- */
 
@@ -1074,7 +1162,7 @@ class TouchTracker {
 		this.moved = false;
 		this.threshold = options.threshold || 5;
 
-		/* Bound handlers for later removal */
+		// Bound handlers for later removal
 		this._touchMove = (e) => this.move(e.touches, true, e);
 		this._touchEnd = () => this._endHandler(true);
 		this._mouseMove = (e) => this.move([{ clientX: e.clientX, clientY: e.clientY }], false);
@@ -1083,7 +1171,7 @@ class TouchTracker {
 		this.init();
 	}
 
-	/* --- Event system --- */
+	// --- Event system ---
 	on(eventName, handler) {
 		if (!this.events[eventName]) this.events[eventName] = [];
 		this.events[eventName].push(handler);
@@ -1101,7 +1189,7 @@ class TouchTracker {
 		}
 	}
 
-	/* --- Initialization ---  */
+	// --- Initialization ---
 	init() {
 		// Bound start handlers (so they can be removed later)
 		this._boundTouchStart = (e) => {
@@ -1121,7 +1209,7 @@ class TouchTracker {
 		this.el.addEventListener("mousedown", this._boundMouseStart);
 	}
 
-	/* --- Touch / mouse start --- */
+	// --- Touch / mouse start ---
 	start(points, isTouch = true) {
 		const now = Date.now();
 		const pts = Array.from(points);
@@ -1144,7 +1232,7 @@ class TouchTracker {
 		});
 	}
 
-	/* --- Movement --- */
+	// --- Movement ---
 	move(points, isTouch = true, event) {
 		if (event) event.preventDefault();
 
@@ -1183,7 +1271,7 @@ class TouchTracker {
 		}
 	}
 
-	/* --- Touch / mouse end --- */
+	// --- Touch / mouse end ---
 	_endHandler(isTouch) {
 		this.end(isTouch);
 
@@ -1231,7 +1319,7 @@ class TouchTracker {
 		}
 	}
 
-	/* --- Direction detection --- */
+	// --- Direction detection ---
 	getDirection(dx, dy) {
 		if (Math.abs(dx) > Math.abs(dy)) {
 			return dx > 0 ? "right" : "left";
@@ -1240,7 +1328,7 @@ class TouchTracker {
 		}
 	}
 
-	/* --- Cleanup --- */
+	// --- Cleanup ---
 	destroy() {
 		// Remove global listeners
 		document.removeEventListener("touchmove", this._touchMove);
