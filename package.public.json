@@ -1,0 +1,14 @@
+{
+  "name": "vbook",
+  "version": "0.1.0",
+  "description": "A lightweight JavaScript class for creating virtual books on any website",
+  "main": "dist/vbook.min.css",
+  "keywords": ["js", "vbook"],
+  "author": "Thomas Bircher",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tbxone/vbook.git"
+  },
+  "files": ["dist/"]
+}
