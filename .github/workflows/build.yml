@@ -35,7 +35,7 @@ jobs:
       # create zip archive of dist and demo folder
       - name: Create stable ZIP
         run: |
-          zip -r vbook-latest.zip dist/vbook.min.css dist/vbook.min.js demo
+          zip vbook-latest.zip -j dist/vbook.min.css -j dist/vbook.min.js -r demo
           
       # Upload ZIP to GitHub Release
       - name: Upload ZIP to Release
